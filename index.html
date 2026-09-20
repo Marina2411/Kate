@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>С Днём Рождения, Катя!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.9.2/confetti.browser.min.js"></script>
+<style>
+  :root {
+    --pink-1: #ff6fa5;
+    --pink-2: #ff9ecf;
+    --gold: #ffd166;
+    --purple: #a78bfa;
+    --bg-top: #fff0f6;
+    --bg-bottom: #ffe1ef;
+    --card-bg: rgba(255, 255, 255, 0.72);
+    --text-main: #4a2540;
+    --text-soft: #8a5a78;
+    --border-soft: rgba(255, 111, 165, 0.25);
+    --shadow: rgba(216, 90, 140, 0.25);
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg-top: #2b1530;
+      --bg-bottom: #1b0f22;
+      --card-bg: rgba(40, 20, 45, 0.65);
+      --text-main: #ffe3f1;
+      --text-soft: #e2b6d1;
+      --border-soft: rgba(255, 158, 207, 0.25);
+      --shadow: rgba(0, 0, 0, 0.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg-top: #2b1530;
+    --bg-bottom: #1b0f22;
+    --card-bg: rgba(40, 20, 45, 0.65);
+    --text-main: #ffe3f1;
+    --text-soft: #e2b6d1;
+    --border-soft: rgba(255, 158, 207, 0.25);
+    --shadow: rgba(0, 0, 0, 0.4);
+  }
+
+  html {
+    scroll-padding-top: env(safe-area-inset-top, 0px);
+    height: 100%;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100%;
+    font-family: 'Nunito', sans-serif;
+    color: var(--text-main);
+    background: linear-gradient(160deg, var(--bg-top), var(--bg-bottom));
+    background-attachment: fixed;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  #confetti-canvas {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  .balloons {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .balloon {
+    position: absolute;
+    bottom: -160px;
+    width: 46px;
+    height: 58px;
+    border-radius: 50% 50% 48% 48%;
+    opacity: 0.55;
+    animation: floatUp linear infinite;
+    filter: drop-shadow(0 6px 8px var(--shadow));
+  }
+  .balloon::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 1px;
+    height: 46px;
+    background: rgba(0,0,0,0.15);
+  }
+  @keyframes floatUp {
+    0% { transform: translateY(0) translateX(0) rotate(-4deg); }
+    50% { transform: translateY(-55vh) translateX(24px) rotate(4deg); }
+    100% { transform: translateY(-115vh) translateX(-16px) rotate(-4deg); }
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 2;
+    max-width: 640px;
+    margin: 0 auto;
+    padding: 48px 20px 72px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .crown {
+    font-size: 44px;
+    margin-bottom: 6px;
+    animation: bob 2.6s ease-in-out infinite;
+  }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(-4deg); }
+    50% { transform: translateY(-10px) rotate(4deg); }
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.1rem, 7vw, 3.4rem);
+    line-height: 1.15;
+    margin: 6px 0 4px;
+    background: linear-gradient(90deg, var(--pink-1), var(--purple), var(--gold));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 4px 24px var(--shadow);
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    color: var(--text-soft);
+    max-width: 440px;
+    margin: 4px 0 30px;
+    font-weight: 600;
+  }
+
+  .music-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-soft);
+    border-radius: 20px;
+    padding: 14px 20px;
+    width: 100%;
+    max-width: 420px;
+    box-shadow: 0 10px 30px var(--shadow);
+    margin-bottom: 30px;
+  }
+  .music-note {
+    font-size: 0.85rem;
+    color: var(--text-soft);
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .katya-photo {
+    width: 100%;
+    max-width: 340px;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 18px;
+    box-shadow: 0 12px 28px var(--shadow);
+    border: 4px solid rgba(255,255,255,0.7);
+    display: block;
+    margin: 0 auto;
+  }
+
+  .confetti-rain {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 6;
+  }
+  .confetti-piece {
+    position: absolute;
+    top: -20px;
+    will-change: transform;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(115vh) translateX(var(--drift, 0px)) rotate(720deg); opacity: 0.9; }
+  }
+
+  .card {
+    background: var(--card-bg);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-soft);
+    border-radius: 22px;
+    padding: 26px 22px;
+    width: 100%;
+    box-shadow: 0 14px 34px var(--shadow);
+    margin-bottom: 24px;
+  }
+
+  .card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin: 0 0 14px;
+    color: var(--text-main);
+  }
+
+  .wish-text {
+    font-size: 1.02rem;
+    line-height: 1.65;
+    color: var(--text-main);
+  }
+
+  form.comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  form.comment-form input,
+  form.comment-form textarea {
+    font-family: 'Nunito', sans-serif;
+    border: 1.5px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 12px 14px;
+    font-size: 0.98rem;
+    background: rgba(255,255,255,0.6);
+    color: var(--text-main);
+    resize: vertical;
+  }
+  :root[data-theme="dark"] form.comment-form input,
+  :root[data-theme="dark"] form.comment-form textarea {
+    background: rgba(0,0,0,0.2);
+  }
+  form.comment-form textarea { min-height: 70px; }
+  form.comment-form button {
+    align-self: flex-end;
+    border: none;
+    cursor: pointer;
+    background: linear-gradient(135deg, var(--gold), var(--pink-1));
+    color: #4a2540;
+    font-weight: 800;
+    padding: 10px 20px;
+    border-radius: 999px;
+    box-shadow: 0 8px 16px var(--shadow);
+  }
+
+  .comments-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+    text-align: left;
+  }
+  .comment-item {
+    background: rgba(255,255,255,0.55);
+    border-radius: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--border-soft);
+  }
+  :root[data-theme="dark"] .comment-item {
+    background: rgba(255,255,255,0.06);
+  }
+  .comment-item .name {
+    font-weight: 800;
+    color: var(--pink-1);
+    font-size: 0.95rem;
+  }
+  .comment-item .msg {
+    margin-top: 4px;
+    font-size: 0.95rem;
+    color: var(--text-main);
+    white-space: pre-wrap;
+  }
+  .empty-note {
+    color: var(--text-soft);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 8px 0;
+  }
+
+  footer {
+    color: var(--text-soft);
+    font-size: 0.82rem;
+    margin-top: 8px;
+    overflow-x: auto;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+<div class="confetti-rain" id="confettiRain"></div>
+<div class="balloons" id="balloons"></div>
+
+<div class="wrap">
+  <div class="crown">🎂</div>
+  <h1>С Днём Рождения,<br>Катя!</h1>
+  <p class="subtitle">Пусть этот день будет наполнен теплом, улыбками и самой лучшей музыкой ✨</p>
+
+  <div class="music-card">
+    <img src="photo.jpg" alt="Катя" class="katya-photo" id="katyaPhoto">
+    <audio id="bgMusic" loop autoplay playsinline preload="auto">
+      <source src="song.mp3" type="audio/mpeg">
+    </audio>
+  </div>
+
+  <div class="card">
+    <h2>💌 Поздравление</h2>
+    <p class="wish-text">
+      Катя, с днём рождения! Желаем счастья, вдохновения и чтобы каждый день был таким же ярким, как этот праздник 🎉🎁
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>💬 Оставить поздравление</h2>
+    <form class="comment-form" id="commentForm">
+      <input type="text" id="nameInput" placeholder="Ваше имя" required maxlength="40">
+      <textarea id="msgInput" placeholder="Ваше поздравление..." required maxlength="500"></textarea>
+      <button type="submit">Отправить 🎈</button>
+    </form>
+    <div class="comments-list" id="commentsList">
+      <p class="empty-note">Пока нет поздравлений — будьте первыми!</p>
+    </div>
+  </div>
+
+  <footer id="statusNote"></footer>
+</div>
+
+<script>
+  // ---------- Confetti bursts from the external library (best-effort) ----------
+  // Wrapped in try/catch: if the library fails to load (no internet at that
+  // moment, blocked CDN, ad-blocker, etc.) this must NOT stop the rest of the
+  // script (rain confetti, music, comments) from running.
+  try {
+    const canvas = document.getElementById('confetti-canvas');
+    if (typeof confetti !== 'undefined' && canvas) {
+      const myConfetti = confetti.create(canvas, { resize: true, useWorker: true });
+
+      const burst = () => myConfetti({
+        particleCount: 120,
+        spread: 100,
+        origin: { y: 0.3 },
+        colors: ['#ff6fa5', '#ffd166', '#a78bfa', '#ff9ecf', '#ffffff']
+      });
+      burst();
+      setTimeout(() => myConfetti({ particleCount: 80, spread: 120, origin: { x: 0.2, y: 0.2 } }), 300);
+      setTimeout(() => myConfetti({ particleCount: 80, spread: 120, origin: { x: 0.8, y: 0.2 } }), 600);
+
+      setInterval(() => {
+        myConfetti({
+          particleCount: 16,
+          startVelocity: 18,
+          spread: 70,
+          origin: { x: Math.random(), y: -0.1 },
+          colors: ['#ff6fa5', '#ffd166', '#a78bfa']
+        });
+      }, 5000);
+    }
+  } catch (e) {
+    // library unavailable — the CSS confetti rain below still runs on its own
+  }
+
+  // ---------- Continuous falling confetti (visible "rain" like in the video) ----------
+  const rainWrap = document.getElementById('confettiRain');
+  const confettiColors = ['#ff6fa5', '#ffd166', '#a78bfa', '#ff9ecf', '#7ee8fa', '#ffffff'];
+  const confettiShapes = ['circle', 'square', 'strip'];
+
+  function spawnConfettiPiece() {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const shape = confettiShapes[Math.floor(Math.random() * confettiShapes.length)];
+    const color = confettiColors[Math.floor(Math.random() * confettiColors.length)];
+    const size = 6 + Math.random() * 8;
+    const left = Math.random() * 100;
+    const duration = 3.5 + Math.random() * 3.5;
+    const drift = (Math.random() * 160 - 80) + 'px';
+
+    piece.style.left = left + 'vw';
+    piece.style.setProperty('--drift', drift);
+    piece.style.animationDuration = duration + 's';
+    piece.style.background = color;
+
+    if (shape === 'circle') {
+      piece.style.width = size + 'px';
+      piece.style.height = size + 'px';
+      piece.style.borderRadius = '50%';
+    } else if (shape === 'square') {
+      piece.style.width = size + 'px';
+      piece.style.height = size + 'px';
+      piece.style.borderRadius = '2px';
+    } else {
+      piece.style.width = (size * 0.4) + 'px';
+      piece.style.height = size * 2.2 + 'px';
+      piece.style.borderRadius = '2px';
+    }
+
+    rainWrap.appendChild(piece);
+    setTimeout(() => piece.remove(), duration * 1000 + 200);
+  }
+
+  // keep a steady shower of confetti falling the whole time the page is open
+  setInterval(() => {
+    for (let i = 0; i < 4; i++) spawnConfettiPiece();
+  }, 220);
+
+  // ---------- Floating balloons ----------
+  const balloonColors = ['#ff6fa5', '#ffd166', '#a78bfa', '#ff9ecf'];
+  const balloonsWrap = document.getElementById('balloons');
+  for (let i = 0; i < 8; i++) {
+    const b = document.createElement('div');
+    b.className = 'balloon';
+    b.style.left = (Math.random() * 96) + 'vw';
+    b.style.background = balloonColors[i % balloonColors.length];
+    b.style.animationDuration = (10 + Math.random() * 8) + 's';
+    b.style.animationDelay = (Math.random() * 8) + 's';
+    balloonsWrap.appendChild(b);
+  }
+
+  // ---------- Photo: try a few common extensions in case the format differs ----------
+  const photoEl = document.getElementById('katyaPhoto');
+  const photoFallbacks = ['photo.png', 'photo.jpeg', 'photo.webp'];
+  let photoTry = 0;
+  photoEl.addEventListener('error', function handlePhotoError() {
+    if (photoTry < photoFallbacks.length) {
+      photoEl.src = photoFallbacks[photoTry++];
+    } else {
+      photoEl.style.display = 'none';
+    }
+  });
+
+  // ---------- Music: autoplay, no button ----------
+  const audio = document.getElementById('bgMusic');
+
+  function tryPlayMusic() {
+    if (!audio.querySelector('source')) return; // no track added yet
+    const p = audio.play();
+    if (p && p.catch) p.catch(() => { /* browser blocked autoplay with sound */ });
+  }
+  tryPlayMusic();
+
+  // Some browsers block sound-on autoplay until the first tap/click anywhere
+  // on the page — this catches that silently, with no visible button.
+  const unlockOnce = () => {
+    tryPlayMusic();
+    window.removeEventListener('click', unlockOnce);
+    window.removeEventListener('touchstart', unlockOnce);
+    window.removeEventListener('keydown', unlockOnce);
+  };
+  window.addEventListener('click', unlockOnce, { once: true });
+  window.addEventListener('touchstart', unlockOnce, { once: true });
+  window.addEventListener('keydown', unlockOnce, { once: true });
+
+  // ---------- Comments ----------
+  const form = document.getElementById('commentForm');
+  const nameInput = document.getElementById('nameInput');
+  const msgInput = document.getElementById('msgInput');
+  const list = document.getElementById('commentsList');
+  const statusNote = document.getElementById('statusNote');
+
+  const LOCAL_KEY = 'katya-bday-comments';
+  let dbApi = null;
+  let usingShared = false;
+  let commentsCache = []; // always mirrors what's on screen, independent of storage backend
+
+  function renderComments(items) {
+    commentsCache = items || [];
+    if (commentsCache.length === 0) {
+      list.innerHTML = '<p class="empty-note">Пока нет поздравлений — будьте первыми!</p>';
+      return;
+    }
+    const sorted = [...commentsCache].sort((a, b) => (b.ts || 0) - (a.ts || 0));
+    list.innerHTML = sorted.map(c => `
+      <div class="comment-item">
+        <div class="name">${escapeHtml(c.name)}</div>
+        <div class="msg">${escapeHtml(c.msg)}</div>
+      </div>
+    `).join('');
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function loadLocal() {
+    try {
+      const raw = localStorage.getItem(LOCAL_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch (e) { return []; }
+  }
+  function saveLocal(items) {
+    try { localStorage.setItem(LOCAL_KEY, JSON.stringify(items)); } catch (e) {}
+  }
+
+  async function initComments() {
+    try {
+      if (window.claude && typeof window.claude.use === 'function') {
+        dbApi = await window.claude.use('db');
+      }
+    } catch (e) { dbApi = null; }
+
+    if (dbApi) {
+      usingShared = true;
+      try {
+        dbApi.collection('comments').onSnapshot((docs) => {
+          const items = docs.map(d => d.data());
+          renderComments(items);
+        });
+        statusNote.textContent = 'Поздравления видны всем, кто открывает эту страницу.';
+      } catch (e) {
+        usingShared = false;
+        renderComments(loadLocal());
+        statusNote.textContent = 'Поздравления сохраняются в этом браузере.';
+      }
+    } else {
+      renderComments(loadLocal());
+      statusNote.textContent = 'Поздравления сохраняются в этом браузере.';
+    }
+  }
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const name = nameInput.value.trim();
+    const msg = msgInput.value.trim();
+    if (!name || !msg) return;
+    const entry = { name, msg, ts: Date.now() };
+
+    // Show it on screen immediately — don't wait on any storage backend.
+    renderComments([...commentsCache, entry]);
+    nameInput.value = '';
+    msgInput.value = '';
+
+    // Persist in the background (best-effort).
+    if (usingShared && dbApi) {
+      const id = 'c_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+      Promise.resolve(dbApi.doc('comments/' + id).set(entry)).catch(() => {
+        const items = loadLocal();
+        items.push(entry);
+        saveLocal(items);
+      });
+    } else {
+      const items = loadLocal();
+      items.push(entry);
+      saveLocal(items);
+    }
+  });
+
+  initComments();
+</script>
+
+</body>
+</html>
